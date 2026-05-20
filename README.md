@@ -298,7 +298,56 @@ hold on;
 semilogy (EbNodB, theoreticalBer, '-r', 'linewidth', 1.5);  
 hold off;  
 grid on;  
-legend ('simulation', 'theoretical');  
+legend ('simulation', 'theoretical');
+
+
+
+```
+clc;  
+clear all;  
+close all;  
+
+% CHANGED: Increased from 10^5 to 10^6. At 9-10 dB, errors are so rare that 
+% 10^5 bits often yield exactly 0 errors, causing log-plot warnings.
+numBits = 10^6;  
+
+bits = randi([0, 1], numBits, 1);  
+bpsk_signal = 2 * bits - 1;  
+EbNodB = 0:10;  
+EbNo = 10.^(EbNodB/10);  
+errors = zeros(size(EbNo));  
+  
+for i = 1:length(EbNo)  % CHANGED: Swapped the typo semicolon (;) with a regular loop structure
+    No = 1 / EbNo(i);  
+    noise = sqrt(No/2) * randn(size(bpsk_signal));  
+    received_signal = bpsk_signal + noise;  
+    received_bits = received_signal > 0;  
+    errors(i) = sum(bits ~= received_bits);  
+end  
+  
+Ber = errors / numBits;  
+
+% CHANGED: Replaced any absolute 0 values with NaN. 
+% semilogy cannot calculate log10(0). Converting 0 to NaN makes the function 
+% skip the point cleanly instead of throwing an "omitting non-positive data" warning.
+Ber(Ber == 0) = NaN;  
+
+theoreticalBer = 0.5 * erfc(sqrt(EbNo));  
+
+figure(1); % CHANGED: Explicitly declared figure handle for cleaner rendering
+semilogy (EbNodB, Ber, 'bo-', 'LineWidth', 1.5);  
+hold on;  
+semilogy (EbNodB, theoreticalBer, '-r', 'linewidth', 1.5);  
+hold off;  
+
+% CHANGED: Cleaned up duplicate 'grid on' commands and added explicit Y-limits 
+% to keep the graph looking uniform down to the lowest simulated values.
+ylim([10^-6 1]); 
+grid on;  
+legend ('Simulation', 'Theoretical');  
+xlabel ('Eb/No (dB)');  
+ylabel ('Bit Error Rate (BER)');
+```
 xlabel ('EbNO(dB)');  
 ylabel ('BER');  
 grid on;
