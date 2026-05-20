@@ -1,8 +1,3 @@
-# Digital-Measuring-Tape
-
-
-
-
 # 1. Waveform coding using PCM
 
 ```
@@ -85,8 +80,7 @@ axis([0 length(bit_stream)-1 0 2])
 grid on
 ```
 
-
-# 2. Matched filter 
+# 2. Matched filter
 
 ```
 clc
@@ -185,7 +179,6 @@ eyediagram(rev2, n)
 
 # 4. BPSK generation
 
-
 ```
 clc
 clear
@@ -243,6 +236,8 @@ What is Replem?
 l=1e6;
 EbNodb= 1:2:10;
 EbNo= 10.^(EbNodb/10);
+N=10;
+j=1i;
 
 for n=1:length(EbNodb)
 	data_inphase = randi([0 1], 1, 10);
@@ -273,4 +268,38 @@ title("Ber performance of QPSK modulation");
 xlabel("EbNoDb")
 ylabel("Ber")
 grid on
+```
+
+# Error performance of BPSK
+
+```
+clc;  
+clear all;  
+close all;  
+numBits = 10^5;  
+bits = randi([0, 1], numBits, 1);  
+bpsk_signal = 2 * bits - 1;  
+EbNodB = 0:10;  
+EbNo = 10.^(EbNodB/10);  
+errors = zeros(size(EbNo));  
+  
+for i = 1:length(EbNo);  
+No = 1 / EbNo(i);  
+noise = sqrt(No/2) * randn(size(bpsk_signal));  
+received_signal = bpsk_signal + noise;  
+received_bits = received_signal > 0;  
+errors(i) = sum(bits ~= received_bits);  
+end  
+  
+Ber = errors / numBits;  
+theoreticalBer = 0.5 * erfc(sqrt(EbNo));  
+semilogy (EbNodB, Ber, 'bo-', 'LineWidth', 1.5);  
+hold on;  
+semilogy (EbNodB, theoreticalBer, '-r', 'linewidth', 1.5);  
+hold off;  
+grid on;  
+legend ('simulation', 'theoretical');  
+xlabel ('EbNO(dB)');  
+ylabel ('BER');  
+grid on;
 ```
